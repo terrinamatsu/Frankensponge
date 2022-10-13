@@ -52,11 +52,13 @@ void ACharPlayer::Tick(float DeltaTime)
 
 	if (bIsAbsorbing)
 	{
-		Absorb(DeltaTime);
+		//Absorb(DeltaTime);
+		OnAbsorbHold.Broadcast(DeltaTime);
 	}
 	if (bIsReleasing)
 	{
-		Release(DeltaTime);
+		//Release(DeltaTime);
+		OnReleaseHold.Broadcast(DeltaTime);
 	}
 }
 
@@ -103,39 +105,61 @@ void ACharPlayer::MoveReleaseCrouch()
 void ACharPlayer::ActionAbsorb()
 {
 	bIsAbsorbing = true;
+	OnAbsorbPress.Broadcast();
 }
 void ACharPlayer::ActionReleaseAbsorb()
 {
 	bIsAbsorbing = false;
+	OnAbsorbRelease.Broadcast();
 }
-void ACharPlayer::Absorb(float _dt)
+void ACharPlayer::Absorb(float _input)
 {
-	AmountAbsorbed += AbsorbRate * _dt;
-	if (AmountAbsorbed > MaxAbsorb)
-	{
-		AmountAbsorbed = MaxAbsorb;
-	}
+	AmountAbsorbed += _input; // * AbsorbRate;
+	CalcAbsorbtion();
 }
 
 
 void ACharPlayer::ActionRelease()
 {
 	bIsReleasing = true;
+	OnReleasePress.Broadcast();
 }
 void ACharPlayer::ActionReleaseRelease()
 {
 	bIsReleasing = false;
+	OnReleaseRelease.Broadcast();
 }
-void ACharPlayer::Release(float _dt)
+void ACharPlayer::Release(float _output)
 {
-	AmountAbsorbed -= ReleaseRate * _dt;
-	if (AmountAbsorbed < 0.0f)
-	{
-		AmountAbsorbed = 0.0f;
-	}
+	AmountAbsorbed -= _output; // * ReleaseRate;
+	CalcAbsorbtion();
 }
 
 void ACharPlayer::ThrowWater()
 {
 	Jump();
+}
+
+void ACharPlayer::CalcAbsorbtion()
+{
+	if (AmountAbsorbed < 0.0f)
+	{
+		AmountAbsorbed = 0.0f;
+	}
+	else if (AmountAbsorbed > MaxAbsorb)
+	{
+		AmountAbsorbed = MaxAbsorb;
+	}
+
+	PercentAbsorbed = (AmountAbsorbed / MaxAbsorb);
+}
+
+bool ACharPlayer::GetIsAbsorbing()
+{
+	return bIsAbsorbing;
+}
+
+bool ACharPlayer::GetIsReleasing()
+{
+	return bIsReleasing;
 }

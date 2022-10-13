@@ -11,6 +11,14 @@
 
 #include "CharPlayer.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAbsorbPressDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbsorbHoldDelegate, float, DeltaTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAbsorbReleaseDelegate);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReleasePressDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseHoldDelegate, float, DeltaTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReleaseReleaseDelegate);
+
 UCLASS()
 class FRANKENSPONGE_API ACharPlayer : public ACharacter
 {
@@ -46,10 +54,24 @@ protected:
 	UFUNCTION()
 		void ThrowWater();
 
-	UFUNCTION()
-		void Absorb(float _dt);
-	UFUNCTION()
-		void Release(float _dt);
+	UFUNCTION(BlueprintCallable)
+		void Absorb(float _input);
+	UFUNCTION(BlueprintCallable)
+		void Release(float _output);
+
+	UPROPERTY(BlueprintAssignable)
+		FOnAbsorbPressDelegate OnAbsorbPress;
+	UPROPERTY(BlueprintAssignable)
+		FOnAbsorbHoldDelegate OnAbsorbHold;
+	UPROPERTY(BlueprintAssignable)
+		FOnAbsorbReleaseDelegate OnAbsorbRelease;
+
+	UPROPERTY(BlueprintAssignable)
+		FOnReleasePressDelegate OnReleasePress;
+	UPROPERTY(BlueprintAssignable)
+		FOnReleaseHoldDelegate OnReleaseHold;
+	UPROPERTY(BlueprintAssignable)
+		FOnReleaseReleaseDelegate OnReleaseRelease;
 
 	// Camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -60,10 +82,17 @@ protected:
 		UStaticMeshComponent* Model;
 
 	bool bIsCrouching = false;
-	bool bIsAbsorbing = false;
-	bool bIsReleasing = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		bool bIsAbsorbing = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		bool bIsReleasing = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		float AmountAbsorbed = 0.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		float PercentAbsorbed = 0.0f;
+
+	UFUNCTION()
+		void CalcAbsorbtion();
 
 public:	
 	// Called every frame
@@ -84,4 +113,9 @@ public:
 		float AbsorbRate = 50.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float ReleaseRate = 70.0f;
+
+	UFUNCTION(BlueprintCallable)
+		bool GetIsAbsorbing();
+	UFUNCTION()
+		bool GetIsReleasing();
 };
