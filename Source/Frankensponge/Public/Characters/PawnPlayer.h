@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "GameFramework/Pawn.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -12,24 +12,25 @@
 
 #include "../Effects/WaterBallProj.h"
 
-#include "CharPlayer.generated.h"
+#include "PawnPlayer.generated.h"
 
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAbsorbPressDelegate);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbsorbHoldDelegate, float, DeltaTime);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAbsorbReleaseDelegate);
-//
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReleasePressDelegate);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseHoldDelegate, float, DeltaTime);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReleaseReleaseDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAbsorbPressDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAbsorbHoldDelegate, float, DeltaTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAbsorbReleaseDelegate);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReleasePressDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReleaseHoldDelegate, float, DeltaTime);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnReleaseReleaseDelegate);
+
 
 UCLASS()
-class FRANKENSPONGE_API ACharPlayer : public ACharacter
+class FRANKENSPONGE_API APawnPlayer : public APawn
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
-	ACharPlayer();
+	// Sets default values for this pawn's properties
+	APawnPlayer();
 
 protected:
 	// Called when the game starts or when spawned
@@ -59,7 +60,7 @@ protected:
 	UFUNCTION()
 		void ThrowWaterRelease();
 
-	/*UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable)
 		FOnAbsorbPressDelegate OnAbsorbPress;
 	UPROPERTY(BlueprintAssignable)
 		FOnAbsorbHoldDelegate OnAbsorbHold;
@@ -71,7 +72,7 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 		FOnReleaseHoldDelegate OnReleaseHold;
 	UPROPERTY(BlueprintAssignable)
-		FOnReleaseReleaseDelegate OnReleaseRelease;*/
+		FOnReleaseReleaseDelegate OnReleaseRelease;
 
 	// Camera
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -80,7 +81,7 @@ protected:
 	// Model
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UStaticMeshComponent* Model;
-	
+
 
 	UMaterialInterface* MaterialSponge;
 	UMaterialInstanceDynamic* SpongeMaterial;
