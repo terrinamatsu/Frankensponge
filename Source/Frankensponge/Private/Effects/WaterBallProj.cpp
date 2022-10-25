@@ -12,7 +12,10 @@ AWaterBallProj::AWaterBallProj()
 	// Setup Water Ball Model
 	WaterBallModel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WaterBall"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("StaticMesh'/Engine/BasicShapes/Sphere.Sphere'"));
-	WaterBallModel->SetStaticMesh(SphereMesh.Object);
+	if (SphereMesh.Succeeded())
+	{
+		WaterBallModel->SetStaticMesh(SphereMesh.Object);
+	}
 	this->SetRootComponent(WaterBallModel);
 	WaterBallModel->SetWorldScale3D(FVector(0.1f, 0.1f, 0.1f));
 

@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 
+#include "UObject/ConstructorHelpers.h"
+#include "Components/InputComponent.h"
+
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -73,13 +76,7 @@ protected:
 	UPROPERTY(BlueprintAssignable)
 		FOnReleaseReleaseDelegate OnReleaseRelease;*/
 
-	// Camera
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UCameraComponent* Camera;
-
-	// Model
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UStaticMeshComponent* Model;
+	
 	
 
 	UMaterialInterface* MaterialSponge;
@@ -94,6 +91,8 @@ protected:
 		float AmountAbsorbed = 0.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		float PercentAbsorbed = 0.0f;
+
+	float TickAmountReleased = 0.0f;
 
 	UFUNCTION()
 		void CalcAbsorbtion();
@@ -115,16 +114,26 @@ public:
 		float MaxScale = 15.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float MaxAbsorb = 500.0f;
+		float MaxAbsorb = 5000.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float AbsorbRate = 50.0f;
+		float AbsorbRate = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float ReleaseRate = 70.0f;
+		float ReleaseRate = 700.0f;
 
 	UFUNCTION(BlueprintCallable)
 		bool GetIsAbsorbing();
 	UFUNCTION()
 		bool GetIsReleasing();
+	UFUNCTION()
+		float GetPercentAbsorbed();
+
+	// Camera
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UCameraComponent* Camera;
+
+	// Model
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UStaticMeshComponent* Model;
 
 	// Collision
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)

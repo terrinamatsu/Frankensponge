@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
+#include "UObject/ConstructorHelpers.h"
+
 #include "Components/BoxComponent.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -41,7 +43,11 @@ protected:
 	// Last Delta Time on particle data function call
 	float AbsorbPreTime;
 
+	TArray<FVector2D> PreParticleSizes;
+
 	TArray<uint32> FindPlayerBoundedParticles(const TArray<FBasicParticleData>& Data);
+
+	bool bInitialParticleRecieve = true;
 
 public:	
 	// Called every frame

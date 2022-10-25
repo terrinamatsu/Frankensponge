@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
+#include "UObject/ConstructorHelpers.h"
+
 #include "Components/SphereComponent.h"
 
 #include "WaterBallProj.generated.h"

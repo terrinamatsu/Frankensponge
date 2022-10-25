@@ -5,12 +5,16 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 
+#include "UObject/ConstructorHelpers.h"
+#include "Components/InputComponent.h"
+
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 
 #include "../Effects/WaterBallProj.h"
+#include "PawnMovementPlayer.h"
 
 #include "PawnPlayer.generated.h"
 
@@ -101,6 +105,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		bool bIsHoldingThrow;
+
+	// Pawn Movement Component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		UPawnMovementPlayer* PlayerPawnMovement;
+	virtual UPawnMovementComponent* GetMovementComponent() const override;
 
 public:	
 	// Called every frame

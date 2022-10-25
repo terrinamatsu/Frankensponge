@@ -15,10 +15,19 @@ APawnPlayer::APawnPlayer()
 	//GetCharacterMovement()->AirControl = 0.5f;
 
 	/* Setup Components */
+
 	// Model
 	Model = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Model"));
+	Model->SetCollisionProfileName(TEXT("Pawn"));
+	Model->SetEnableGravity(true);
+	Model->SetSimulatePhysics(true);
+
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> FrankenSpongeMesh(TEXT("StaticMesh'/Game/Models/Frankensponge/FrankenTest.FrankenTest'"));
-	Model->SetStaticMesh(FrankenSpongeMesh.Object);
+	if (FrankenSpongeMesh.Succeeded())
+	{
+		Model->SetStaticMesh(FrankenSpongeMesh.Object);
+	}
+	//Model->SetupAttachment(RootComponent);
 	RootComponent = Model;
 
 	Model->SetRelativeLocation(FVector(0.0f, 0.0f, -85.0f));
@@ -43,13 +52,19 @@ APawnPlayer::APawnPlayer()
 
 	// Camera
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(Model);
+	Camera->SetupAttachment(RootComponent);
 	// Move Camera back
 	Camera->SetRelativeLocation(FVector(-300.0f, 0.0f, 0.0f));
 
 	// Setup Crouching Controls
-	//GetCharacterMovement()->CrouchedHalfHeight = 88.0f;
 	//GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+	// Setup Pawn Movement
+	PlayerPawnMovement = CreateDefaultSubobject<UPawnMovementPlayer>(TEXT("PlayerPawnMovement"));
+	PlayerPawnMovement->UpdatedComponent = RootComponent;
+
+	// Setup Input
+	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
 
 // Called when the game starts or when spawned
@@ -119,9 +134,18 @@ void APawnPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void APawnPlayer::MoveLeftRight(float AxisValue)
 {
-	// Find out which way is "right" move the player in that direction
-	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
-	AddMovementInput(Direction, AxisValue);
+	if (AxisValue != 0.0f)
+	{
+		// Find out which way is "right" & move the player in that direction
+		FVector Direction = GetActorForwardVector();//FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
+		
+		if (PlayerPawnMovement && (PlayerPawnMovement->UpdatedComponent == RootComponent))
+		{
+			PlayerPawnMovement->AddInputVector(Direction * AxisValue);
+		}
+		
+		GLog->Log(FString::Printf(TEXT("%f, %f, %f"), Direction.X, Direction.Y, Direction.Z));
+	}
 }
 
 void APawnPlayer::MoveJump()
@@ -254,4 +278,9 @@ float APawnPlayer::CalcRelease(const float _dt)
 	}
 
 	return TotalRelease;
+}
+
+UPawnMovementComponent* APawnPlayer::GetMovementComponent() const
+{
+	return PlayerPawnMovement;
 }

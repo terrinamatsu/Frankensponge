@@ -77,6 +77,15 @@ void ACharPlayer::Tick(float DeltaTime)
 
 	Model->SetRelativeScale3D(CurrentModelScale);
 
+	// Release into void
+	if (TickAmountReleased < (ReleaseRate * DeltaTime) && bIsReleasing)
+	{
+		Release((ReleaseRate * DeltaTime) - TickAmountReleased);
+	}
+
+	TickAmountReleased = 0.0f;
+
+
 	// Trigger on Absorb & Release events
 	if (bIsAbsorbing)
 	{
@@ -171,6 +180,8 @@ void ACharPlayer::Release(float _output)
 {
 	AmountAbsorbed -= _output; // * ReleaseRate;
 	CalcAbsorbtion();
+
+	TickAmountReleased += _output;
 }
 
 void ACharPlayer::ThrowWaterPress()
@@ -254,4 +265,9 @@ float ACharPlayer::CalcRelease(const float _dt)
 	}
 
 	return TotalRelease;
+}
+
+float ACharPlayer::GetPercentAbsorbed()
+{
+	return PercentAbsorbed;
 }

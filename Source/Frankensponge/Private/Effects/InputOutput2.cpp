@@ -14,7 +14,10 @@ AInputOutput2::AInputOutput2()
 	SetRootComponent(TestNiagaraSystem);
 
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> InputOutputSystem(TEXT("NiagaraSystem'/Game/Effects/P_InputOutputTest.P_InputOutputTest'"));
-	TestNiagaraSystem->SetAsset(InputOutputSystem.Object);
+	if (InputOutputSystem.Succeeded())
+	{
+		TestNiagaraSystem->SetAsset(InputOutputSystem.Object);
+	}
 
 
 	BoundingBox = CreateDefaultSubobject<UBoxComponent>(TEXT("BoundingBox"));
@@ -83,17 +86,77 @@ void AInputOutput2::ReceiveParticleData_Implementation(const TArray<FBasicPartic
 	//\ never mind it's probably just better to use raw world delta seconds.
 	CurDT = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
 
-	// Calculate Player Absorbing & Releasing (Inputting new data to Niagara System)
-	if (Player)
+
+	if (bInitialParticleRecieve)
 	{
-		if (Player->GetIsReleasing() && BoundingBox->IsOverlappingComponent(Player->BoundingBox))
+		// DEBUG OUTPUT CIRCLE
+		TArray<FVector2D> ParticleSizes;
+		for (auto i = 0; i < Data.Num(); ++i)
 		{
-			Player->Release(SpongeRelease(Data, Player->CalcRelease(CurDT)));
+			int x = i / 20.0f;
+			int y = i % 20;
+
+			float fx = x;
+			float fy = y;
+
+			FVector2D xy = FVector2D(fx / 20.0f, fy / 20.0f);
+			xy = xy - 0.5f;
+			xy = xy * 2.0f;
+			float len = xy.Length();
+
+			if (len <= 0.5f)
+			{
+				ParticleSizes.Add(FVector2D(20.0f));
+			}
+			else
+			{
+				ParticleSizes.Add(FVector2D((i / 20.0f) + 5.0f));
+			}
 		}
-		else if (Player->GetIsAbsorbing() && BoundingBox->IsOverlappingComponent(Player->BoundingBox))
+		UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector2D(TestNiagaraSystem, "Import", ParticleSizes);
+
+		// Verify Particles imported are same as last frame?
+		bool checker = true;
+		for (int i = 0; i < PreParticleSizes.Num(); ++i)
 		{
-			Player->Absorb(SpongeAbsorb(Data, Player->CalcAbsorb(CurDT)));
+			if (PreParticleSizes[i] != ParticleSizes[i])
+			{
+				checker = false;
+			}
 		}
+
+		if (checker && PreParticleSizes.Num() > 0)
+		{
+			GLog->Log("Checked and samepilled.");
+		}
+
+		PreParticleSizes = ParticleSizes;
+
+		bInitialParticleRecieve = false;
+	}
+	else
+	{
+		// Calculate Player Absorbing & Releasing (Inputting new data to Niagara System)
+		if (Player)
+		{
+			if (Player->GetIsReleasing() && BoundingBox->IsOverlappingComponent(Player->BoundingBox))
+			{
+				Player->Release(SpongeRelease(Data, Player->CalcRelease(CurDT)));
+			}
+			else if (Player->GetIsAbsorbing() && BoundingBox->IsOverlappingComponent(Player->BoundingBox))
+			{
+				Player->Absorb(SpongeAbsorb(Data, Player->CalcAbsorb(CurDT)));
+			}
+			else
+			{
+				TArray<FVector2D> ParticleSizes;
+				for (auto& Part: Data)
+				{
+					ParticleSizes.Add(FVector2D(Part.Size, Part.Size));
+				}
+				UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector2D(TestNiagaraSystem, "Import", ParticleSizes);
+			}
+		}	
 	}
 }
 
@@ -152,6 +215,8 @@ float AInputOutput2::SpongeRelease(const TArray<FBasicParticleData>& Data, float
 		ParticleSizes[i] = FVector2D(NewSize);
 
 		TotalReleased += NewSize - Data[i].Size;
+
+		DrawDebugSphere(GetWorld(), Data[i].Position, Data[i].Size, 4, FColor::Red, false, 1.0f);
 	}
 
 	// Import new particle size data to Niagara System
@@ -213,6 +278,8 @@ float AInputOutput2::SpongeAbsorb(const TArray<FBasicParticleData>& Data, float 
 		ParticleSizes[i] = FVector2D(NewSize);
 
 		TotalAbsorbed += Data[i].Size - NewSize;
+
+		DrawDebugSphere(GetWorld(), Data[i].Position, Data[i].Size, 4, FColor::Blue, false, 1.0f);
 	}
 
 	// Import new particle size data to Niagara System

@@ -14,7 +14,10 @@ AWaterSpout::AWaterSpout()
 	SetRootComponent(TestNiagaraSystem);
 
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> InputOutputSystem(TEXT("NiagaraSystem'/Game/Effects/Final/P_WaterFountain.P_WaterFountain'"));
-	TestNiagaraSystem->SetAsset(InputOutputSystem.Object);
+	if (InputOutputSystem.Succeeded())
+	{
+		TestNiagaraSystem->SetAsset(InputOutputSystem.Object);
+	}
 
 	BoundingBox = CreateDefaultSubobject<UBoxComponent>(TEXT("BoundingBox"));
 	BoundingBox->SetupAttachment(TestNiagaraSystem);
